@@ -1,0 +1,582 @@
+<!DOCTYPE html>
+<html lang="tr">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>eptran</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Literata:ital,wght@0,300;0,400;0,500;1,300;1,400&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet" />
+  <style>
+    :root {
+      --bg:       #2d353b;
+      --bg1:      #343f44;
+      --bg2:      #3d484d;
+      --bg3:      #475258;
+      --fg:       #d3c6aa;
+      --fg-dim:   #859289;
+      --green:    #a7c080;
+      --yellow:   #dbbc7f;
+      --red:      #e67e80;
+      --blue:     #7fbbb3;
+      --orange:   #e69875;
+      --aqua:     #83c092;
+      --border:   #4a555b;
+    }
+
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+
+    body {
+      background: var(--bg);
+      color: var(--fg);
+      font-family: 'Literata', Georgia, serif;
+      min-height: 100vh;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      padding: 3rem 1.5rem;
+    }
+
+    header {
+      margin-bottom: 3rem;
+      text-align: center;
+    }
+
+    header h1 {
+      font-size: 2.4rem;
+      font-weight: 300;
+      letter-spacing: 0.15em;
+      color: var(--green);
+      font-style: italic;
+    }
+
+    header p {
+      font-size: 0.9rem;
+      color: var(--fg-dim);
+      margin-top: 0.4rem;
+      font-family: 'JetBrains Mono', monospace;
+    }
+
+    .card {
+      background: var(--bg1);
+      border: 1px solid var(--border);
+      border-radius: 8px;
+      width: 100%;
+      max-width: 560px;
+      padding: 2rem;
+      margin-bottom: 1.5rem;
+    }
+
+    .card-title {
+      font-size: 0.75rem;
+      font-family: 'JetBrains Mono', monospace;
+      color: var(--fg-dim);
+      letter-spacing: 0.1em;
+      text-transform: uppercase;
+      margin-bottom: 1.2rem;
+    }
+
+    /* Drop zone */
+    #drop-zone {
+      border: 2px dashed var(--border);
+      border-radius: 6px;
+      padding: 2.5rem 1.5rem;
+      text-align: center;
+      cursor: pointer;
+      transition: border-color 0.2s, background 0.2s;
+      position: relative;
+    }
+
+    #drop-zone:hover, #drop-zone.drag-over {
+      border-color: var(--green);
+      background: rgba(167, 192, 128, 0.05);
+    }
+
+    #drop-zone input[type="file"] {
+      position: absolute;
+      inset: 0;
+      opacity: 0;
+      cursor: pointer;
+    }
+
+    #drop-zone .icon {
+      font-size: 2rem;
+      margin-bottom: 0.75rem;
+      display: block;
+    }
+
+    #drop-zone .label {
+      font-size: 0.95rem;
+      color: var(--fg-dim);
+    }
+
+    #drop-zone .label strong {
+      color: var(--green);
+      font-weight: 500;
+    }
+
+    #file-info {
+      display: none;
+      margin-top: 1rem;
+      padding: 0.75rem 1rem;
+      background: var(--bg2);
+      border-radius: 4px;
+      font-family: 'JetBrains Mono', monospace;
+      font-size: 0.8rem;
+      color: var(--yellow);
+      display: flex;
+      align-items: center;
+      gap: 0.5rem;
+    }
+
+    #file-info.hidden { display: none !important; }
+
+    #submit-btn {
+      margin-top: 1.2rem;
+      width: 100%;
+      padding: 0.75rem;
+      background: var(--green);
+      color: var(--bg);
+      border: none;
+      border-radius: 5px;
+      font-family: 'JetBrains Mono', monospace;
+      font-size: 0.85rem;
+      font-weight: 500;
+      cursor: pointer;
+      letter-spacing: 0.05em;
+      transition: opacity 0.2s;
+    }
+
+    #submit-btn:hover:not(:disabled) { opacity: 0.85; }
+    #submit-btn:disabled { opacity: 0.4; cursor: not-allowed; }
+
+    /* Status card */
+    #status-card { display: none; }
+    #status-card.visible { display: block; }
+
+    .progress-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: baseline;
+      margin-bottom: 0.8rem;
+    }
+
+    .progress-book {
+      font-size: 1rem;
+      color: var(--fg);
+      font-style: italic;
+    }
+
+    .progress-count {
+      font-family: 'JetBrains Mono', monospace;
+      font-size: 0.8rem;
+      color: var(--fg-dim);
+    }
+
+    .progress-bar-track {
+      height: 4px;
+      background: var(--bg3);
+      border-radius: 2px;
+      overflow: hidden;
+      margin-bottom: 0.8rem;
+    }
+
+    .progress-bar-fill {
+      height: 100%;
+      background: var(--green);
+      border-radius: 2px;
+      transition: width 0.8s ease;
+      width: 0%;
+    }
+
+    .progress-chapter {
+      font-size: 0.8rem;
+      font-family: 'JetBrains Mono', monospace;
+      color: var(--fg-dim);
+      white-space: nowrap;
+      overflow: hidden;
+      text-overflow: ellipsis;
+    }
+
+    .status-badge {
+      display: inline-block;
+      padding: 0.2rem 0.6rem;
+      border-radius: 3px;
+      font-family: 'JetBrains Mono', monospace;
+      font-size: 0.7rem;
+      letter-spacing: 0.05em;
+    }
+
+    .badge-running {
+      background: rgba(219, 188, 127, 0.15);
+      color: var(--yellow);
+    }
+
+    .badge-completed {
+      background: rgba(167, 192, 128, 0.15);
+      color: var(--green);
+    }
+
+    .badge-idle {
+      background: rgba(133, 146, 137, 0.15);
+      color: var(--fg-dim);
+    }
+
+    .status-row {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      margin-bottom: 1.2rem;
+    }
+
+    /* Pulse animation for running */
+    @keyframes pulse {
+      0%, 100% { opacity: 1; }
+      50% { opacity: 0.5; }
+    }
+
+    .badge-running { animation: pulse 2s ease-in-out infinite; }
+
+    /* Output files */
+    #output-section { display: none; }
+    #output-section.visible { display: block; }
+
+    .output-list {
+      display: flex;
+      flex-direction: column;
+      gap: 0.5rem;
+      margin-top: 0.5rem;
+    }
+
+    .output-item {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      padding: 0.5rem 0.75rem;
+      background: var(--bg2);
+      border-radius: 4px;
+      font-family: 'JetBrains Mono', monospace;
+      font-size: 0.78rem;
+      color: var(--fg);
+    }
+
+    .output-item a {
+      color: var(--blue);
+      text-decoration: none;
+      font-size: 0.75rem;
+    }
+
+    .output-item a:hover { text-decoration: underline; }
+
+    /* Error */
+    #error-msg {
+      display: none;
+      margin-top: 0.8rem;
+      padding: 0.6rem 0.9rem;
+      background: rgba(230, 126, 128, 0.1);
+      border: 1px solid rgba(230, 126, 128, 0.3);
+      border-radius: 4px;
+      font-size: 0.82rem;
+      color: var(--red);
+      font-family: 'JetBrains Mono', monospace;
+    }
+
+    #error-msg.visible { display: block; }
+
+    /* Updated at */
+    .updated-at {
+      font-size: 0.72rem;
+      color: var(--fg-dim);
+      font-family: 'JetBrains Mono', monospace;
+      margin-top: 0.6rem;
+      text-align: right;
+    }
+
+    footer {
+      margin-top: auto;
+      padding-top: 3rem;
+      font-size: 0.75rem;
+      color: var(--bg3);
+      font-family: 'JetBrains Mono', monospace;
+      text-align: center;
+    }
+
+    footer a { color: var(--border); text-decoration: none; }
+    footer a:hover { color: var(--fg-dim); }
+  </style>
+</head>
+<body>
+
+<header>
+  <h1>eptran</h1>
+  <p>epub → türkçe çeviri</p>
+</header>
+
+<!-- Upload card -->
+<div class="card" id="upload-card">
+  <div class="card-title">kitap yükle</div>
+
+  <div id="drop-zone">
+    <input type="file" id="file-input" accept=".epub" />
+    <span class="icon">📖</span>
+    <div class="label">
+      <strong>epub seç</strong> ya da sürükle bırak
+    </div>
+  </div>
+
+  <div id="file-info" class="hidden">
+    <span>📄</span>
+    <span id="file-name-label"></span>
+  </div>
+
+  <button id="submit-btn" disabled>Çeviriyi Başlat</button>
+  <div id="error-msg"></div>
+</div>
+
+<!-- Status card -->
+<div class="card" id="status-card">
+  <div class="card-title">çeviri durumu</div>
+
+  <div class="status-row">
+    <div class="progress-book" id="status-book">—</div>
+    <span class="status-badge badge-idle" id="status-badge">bekliyor</span>
+  </div>
+
+  <div class="progress-bar-track">
+    <div class="progress-bar-fill" id="progress-fill"></div>
+  </div>
+
+  <div class="progress-header">
+    <div class="progress-chapter" id="status-chapter">—</div>
+    <div class="progress-count" id="status-count">0 / 0</div>
+  </div>
+
+  <div class="updated-at" id="updated-at"></div>
+</div>
+
+<!-- Output section -->
+<div class="card" id="output-section">
+  <div class="card-title">çıktı dosyaları</div>
+  <div class="output-list" id="output-list"></div>
+</div>
+
+<footer>
+  <a href="https://github.com/search?q=eptran" target="_blank">github</a>
+  &nbsp;·&nbsp; gemini 2.0 flash
+</footer>
+
+<script>
+  const dropZone = document.getElementById('drop-zone');
+  const fileInput = document.getElementById('file-input');
+  const fileInfo = document.getElementById('file-info');
+  const fileNameLabel = document.getElementById('file-name-label');
+  const submitBtn = document.getElementById('submit-btn');
+  const errorMsg = document.getElementById('error-msg');
+  const statusCard = document.getElementById('status-card');
+  const outputSection = document.getElementById('output-section');
+
+  let selectedFile = null;
+  let pollInterval = null;
+
+  // Drag & drop
+  dropZone.addEventListener('dragover', e => { e.preventDefault(); dropZone.classList.add('drag-over'); });
+  dropZone.addEventListener('dragleave', () => dropZone.classList.remove('drag-over'));
+  dropZone.addEventListener('drop', e => {
+    e.preventDefault();
+    dropZone.classList.remove('drag-over');
+    const file = e.dataTransfer.files[0];
+    if (file) setFile(file);
+  });
+
+  fileInput.addEventListener('change', () => {
+    if (fileInput.files[0]) setFile(fileInput.files[0]);
+  });
+
+  function setFile(file) {
+    if (!file.name.endsWith('.epub')) {
+      showError('Sadece .epub dosyaları destekleniyor.');
+      return;
+    }
+    selectedFile = file;
+    fileNameLabel.textContent = file.name;
+    fileInfo.classList.remove('hidden');
+    submitBtn.disabled = false;
+    hideError();
+  }
+
+  submitBtn.addEventListener('click', async () => {
+    if (!selectedFile) return;
+    submitBtn.disabled = true;
+    submitBtn.textContent = 'Hazırlanıyor...';
+    hideError();
+
+    try {
+      // 1. Credentials al
+      const credsRes = await fetch('/api/creds');
+      if (!credsRes.ok) throw new Error('Credentials alınamadı');
+      const { repo, branch, pat } = await credsRes.json();
+
+      // 2. Dosyayı base64'e çevir
+      submitBtn.textContent = 'Dosya okunuyor...';
+      const base64 = await toBase64(selectedFile);
+
+      // 3. Direkt GitHub API'ye yükle (Vercel limiti yok)
+      submitBtn.textContent = "GitHub'a yükleniyor...";
+
+      // Dosya zaten varsa sha al (güncelleme için gerekli)
+      let existingSha;
+      const checkRes = await fetch(
+        `https://api.github.com/repos/${repo}/contents/input/${selectedFile.name}`,
+        { headers: { Authorization: `token ${pat}` } }
+      );
+      if (checkRes.ok) {
+        const existing = await checkRes.json();
+        existingSha = existing.sha;
+      }
+
+      const commitBody = {
+        message: `upload: ${selectedFile.name}`,
+        content: base64,
+        branch,
+      };
+      if (existingSha) commitBody.sha = existingSha;
+
+      const commitRes = await fetch(
+        `https://api.github.com/repos/${repo}/contents/input/${selectedFile.name}`,
+        {
+          method: 'PUT',
+          headers: {
+            Authorization: `token ${pat}`,
+            'Content-Type': 'application/json',
+          },
+          body: JSON.stringify(commitBody),
+        }
+      );
+
+      if (!commitRes.ok) {
+        const err = await commitRes.json();
+        throw new Error(err.message || 'GitHub yükleme başarısız');
+      }
+
+      // 4. Workflow tetikle
+      submitBtn.textContent = 'Çeviri başlatılıyor...';
+      const triggerRes = await fetch('/api/trigger', { method: 'POST' });
+      const triggerData = await triggerRes.json();
+      if (!triggerRes.ok) {
+        throw new Error(triggerData.error || 'Workflow tetiklenemedi');
+      }
+
+      submitBtn.textContent = 'Çeviri Başladı ✓';
+      startPolling();
+    } catch (err) {
+      showError('Hata: ' + err.message);
+      submitBtn.disabled = false;
+      submitBtn.textContent = 'Çeviriyi Başlat';
+    }
+  });
+
+  function toBase64(file) {
+    return new Promise((resolve, reject) => {
+      const reader = new FileReader();
+      reader.onload = () => resolve(reader.result.split(',')[1]);
+      reader.onerror = () => reject(new Error('Dosya okunamadı'));
+      reader.readAsDataURL(file);
+    });
+  }
+
+  function startPolling() {
+    statusCard.classList.add('visible');
+    fetchStatus();
+    pollInterval = setInterval(fetchStatus, 10000);
+  }
+
+  async function fetchStatus() {
+    try {
+      const res = await fetch('/api/status');
+      const data = await res.json();
+      updateStatusUI(data);
+
+      if (data.status === 'completed' || data.status === 'idle') {
+        clearInterval(pollInterval);
+      }
+    } catch (err) {
+      console.error('Status fetch error:', err);
+    }
+  }
+
+  function updateStatusUI(data) {
+    const badge = document.getElementById('status-badge');
+    const bookEl = document.getElementById('status-book');
+    const chapterEl = document.getElementById('status-chapter');
+    const countEl = document.getElementById('status-count');
+    const fill = document.getElementById('progress-fill');
+    const updatedAt = document.getElementById('updated-at');
+
+    // Status badge
+    badge.className = 'status-badge';
+    if (data.status === 'running') {
+      badge.classList.add('badge-running');
+      badge.textContent = 'çalışıyor';
+    } else if (data.status === 'completed') {
+      badge.classList.add('badge-completed');
+      badge.textContent = 'tamamlandı';
+    } else {
+      badge.classList.add('badge-idle');
+      badge.textContent = 'bekliyor';
+    }
+
+    if (data.book) bookEl.textContent = data.book.replace(/_/g, ' ');
+    if (data.current_chapter) chapterEl.textContent = '→ ' + data.current_chapter;
+
+    const total = data.total || 0;
+    const completed = data.completed || 0;
+    countEl.textContent = `${completed} / ${total}`;
+    fill.style.width = total > 0 ? `${(completed / total) * 100}%` : '0%';
+
+    if (data.updated_at) {
+      const d = new Date(data.updated_at);
+      updatedAt.textContent = 'güncellendi: ' + d.toLocaleString('tr-TR');
+    }
+
+    // Output files
+    if (data.outputFiles && data.outputFiles.length > 0) {
+      outputSection.classList.add('visible');
+      const list = document.getElementById('output-list');
+      list.innerHTML = data.outputFiles
+        .map(f => `
+          <div class="output-item">
+            <span>${f.name}</span>
+            <a href="${f.download_url}" target="_blank">indir</a>
+          </div>`)
+        .join('');
+    }
+  }
+
+  function showError(msg) {
+    errorMsg.textContent = msg;
+    errorMsg.classList.add('visible');
+  }
+
+  function hideError() {
+    errorMsg.classList.remove('visible');
+  }
+
+  // On page load, check status
+  window.addEventListener('load', async () => {
+    try {
+      const res = await fetch('/api/status');
+      const data = await res.json();
+      if (data.status === 'running' || data.status === 'completed') {
+        statusCard.classList.add('visible');
+        updateStatusUI(data);
+        if (data.status === 'running') {
+          submitBtn.textContent = 'Çeviri Devam Ediyor';
+          submitBtn.disabled = true;
+          startPolling();
+        }
+      }
+    } catch (_) {}
+  });
+</script>
+</body>
+</html>

@@ -1,0 +1,9 @@
+.env
+.env.local
+node_modules/
+__pycache__/
+*.pyc
+.vercel/
+
+# Input klasörü içindeki gerçek dosyalar (sadece .gitkeep kalır)
+input/*.epub
