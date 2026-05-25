@@ -1,0 +1,69 @@
+# Translator’s Notes – The Apothecary Diaries vol. 13
+
+Çeviri Notları: Eczane Günlükleri cilt 13
+
+Çeviri Notları - 
+Eczane Günlükleri
+ cilt 13
+
+Tonunu İzle
+
+Önceki Eczane Günlükleri bölümlerinde, çevirmenlerin belirli bir pasaj veya esere uygun kelimelerin seçiminde ve hatta cümlelerin hedef dilde ve kaynak dilde yapılandırılmasında nasıl kararlar aldıklarını konuşmuştuk. Bunlar sadece temel anlatım için değil, kurgu eserinin can damarı olan karakterler için de geçerlidir. Eczane Günlükleri, resmiyeti seven memurlardan soylulara, suçlulardan, metreslere ve elbette eczacılara kadar birçok karakterle doludur!
+
+Bu çeşitli sesleri çeviri yoluyla temsil etmek, bir İngilizce eseri yazan birinin karakterlerini iletmek için kullandığı araçların aynı kontrolünü gerektirir, ancak elbette bir çevirmen bunu yaparken aynı zamanda karakterlerin orijinal metinde nasıl seslendiklerini de dikkate almalıdır. Bu, kısmen yaratma ve kısmen "yeniden yaratma" işidir.
+
+Basit bir örnek verelim: 
+urusee
+ (veya 
+urusei
+). Bu, sadece bir kelime, 
+urusai
+ sıfatının bir bozulması, yani 
+gürültülü
+ veya 
+sesli
+ (hoş olmayan bir şekilde) anlamına gelir. Bu tür bir bozulma, genellikle zorlu karakterlerin veya en azından kızgın karakterlerin özelliğidir.
+
+Bu bilgiyi göz önünde bulundurarak, olası bir çeviriyi düşünün: "Özür dilerim, ama biraz gürültülü oluyorsun."
+
+Aynı hissi vermiyor, değil mi? 
+Ton
+ tamamen farklı; çeviri konuşmacıyı kibar, hatta utangaç yapıyor. Metinde 
+urusee
+'yi bu sesle aktarmak için bir neden yoksa, olası çevirimiz muhtemelen uygun olmayacaktır. "Sessiz ol!" veya "Sus!" veya iyi bir "Kapa çeneni!" gibi bir şey muhtemelen daha iyi olacaktır.
+
+Bu ayrımı vurgulayan bir karakter, favori kahramanımız Maomao'dur. Kendisini sosyal hiyerarşinin dibinde görür, bu nedenle neredeyse herkesle saygılı bir şekilde konuşur. (Japonca'da, genellikle "kibar" dil olarak adlandırılan şey - örneğin cümle/fiil sonları 
+desu 
+ve 
+-masu
+- aslında etrafındaki insanlarla sosyal olarak uygun bir şekilde ilişki kurmakla ilgilidir.) Maomao'nun kendi kafasında ne düşündüğü, sadece okuyucu tarafından duyulur ve (şükür ki) iç sesinin konuları tarafından duyulmaz. Bu nedenle, onlara karşı özellikle kibar olmak için hiçbir zorunluluğu hissetmez. Bu, çeviride temsil edilebilecek ve edilebilecek bir ayrımdır.
+
+Karakter sesi sorusu, açık kullanım farklılıklarının ötesine geçer. Bir kelime, karakterin kullandığı kelime ve dinleyicisiyle olan ilişkisine bağlı olarak farklı şekilde çevrilebilir. Basit bir ifade olarak 
+konnichiwa
+'yı düşünün. Tamamen nötr bir bağlamda, bu sadece 
+merhaba
+ olarak çevrilebilir. Daha aristokrat bir karakter 
+günaydın
+ diyebilir - veya belki de biri ile konuşurken 
+merhaba
+ diyebilir. Eğer Lihaku Maomao'yu selamlıyorsa, bu 
+merhaba
+ gibi bir şey olabilir!
+
+Benzer şekilde, diğer kelime seçimleri de bir karakterin geçmişine göre belirlenir. Bir asil, bir eğitimli olmayan bir ortak halktan daha "büyük" kelimeler kullanma eğiliminde olacaktır, bu nedenle her ikisi de 
+kaitai
+ (ayırma, parçalama) kelimesini kullanırsa, bir bilim insanı 
+dissect
+ (kesme) terimini kullanabilir, bir asil 
+render
+ (yorumlama) kullanabilir, bir aşçı 
+butcher
+ (kesme) diyebilir ve bir ortak halk 
+chop up
+ (parçalama) diyebilir.
+
+Bunda bir subjektivite unsuru vardır, ancak yine de çevirmen her zaman orijinal metni dikkate almalıdır, yukarıdaki 
+urusee
+ örneğimiz gibi. Karakterin sesi Japoncada mevcuttur; çevirmenin görevi, bu sesi İngilizce'de mevcut olan tüm araçları kullanarak temsil etmektir. Elbette, farklı çevirmenler bir karakterin İngilizce'de nasıl seslendirilmesi gerektiği konusunda biraz farklı sonuçlara varabilir - çevirmenler de herhangi bir yazar gibi kendi seslerine sahiptir ve Japon yazarın sesi herhangi bir çeviride öncelikli olsa da, sesinin tam sesi her zaman onunla birlikte konuşan ses tarafından etkilenir. Çevirmenlerin karakterin sesini başarılı bir şekilde iletip iletmediğini kontrol etmeye yardımcı olmak için editörlerin çeviri sürecinin önemli bir parçası olması bu nedenledir. ("Sanırım falan kişi bu kelimeyi kullanmaz," Sasha bana böyle diyebilir.) Bu, çeviri yoluyla kurulan bağın güzelliğinin bir parçasıdır, bize bir yazarla bağlantı kurduğumuzda, bunu diğer insanlarla birlikte yaptığımızı hatırlatır.
+
+Eğlenin, geniş bir yelpazede okuyun ve bir sonraki ciltte görüşürüz!
