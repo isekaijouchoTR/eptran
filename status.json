@@ -1,10 +1,10 @@
 {
   "status": "running",
-  "book": "ngnlv1",
-  "epub_file": "ngnlv1.epub",
-  "total": 10,
-  "completed": 5,
-  "current_chapter": "CHAPTER 3",
-  "started_at": "2026-05-25T10:03:39.146023+00:00",
-  "updated_at": "2026-05-25T10:03:40.399346+00:00"
+  "book": "knhv13",
+  "epub_file": "knhv13.epub",
+  "total": 25,
+  "completed": 0,
+  "current_chapter": "",
+  "started_at": "2026-05-25T16:19:14.919853+00:00",
+  "updated_at": "2026-05-25T16:19:14.919880+00:00"
 }
