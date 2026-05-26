@@ -1,10 +1,10 @@
 {
-  "status": "running",
+  "status": "completed",
   "book": "knhv13",
   "epub_file": "knhv13.epub",
   "total": 25,
   "completed": 25,
-  "current_chapter": "Chapter 15: Jinshi’s Shock, Maomao’s Resolution",
+  "current_chapter": "",
   "started_at": "2026-05-26T02:45:56.284641+00:00",
-  "updated_at": "2026-05-26T02:46:47.788226+00:00"
+  "updated_at": "2026-05-26T02:46:48.678933+00:00"
 }
