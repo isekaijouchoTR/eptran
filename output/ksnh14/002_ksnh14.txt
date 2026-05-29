@@ -1,0 +1,35 @@
+# Translator’s Notes – The Apothecary Diaries Vol. 14
+
+Çeviri Notları: Eczane Günlükleri Cilt 14
+
+Kanıt, Kanıt Okumada Gizli
+
+Bu notlar boyunca, bir kitabın size, okura ulaşırken geçtiği birçok aşama hakkında konuştuk. Arka plan ve kelime hazinesi hakkında ilk araştırmadan, yapı ve ton hakkında yapılan seçimlere, ve çeviri taslağının güçlü olmasını sağlamak için çevirmen ve editörün işbirliği yaptığı düzenleme sürecinden bahsettik.
+
+Ancak, bu sürecin sonu değil! Yayınlanan herhangi bir kitap gibi, Eczane Günlükleri cilt 14 de yayınlanmadan önce kanıt okuma aşamasından geçmelidir. Bu, elyazmasının resmi olarak yayınlanmadan önce son bir kez parlatma fırsatıdır.
+
+Peki, kanıt okuma nedir? Bu aşamada, bir kanıt okuyucu (tabii ki) tüm elyazmasını gözden geçirir ve yazım hataları, noktalama hataları, dilbilgisi sorunları ve benzeri temel unsurları arar. Ayrıca kitabın stilinin tutarlı olduğundan emin olur - J-Novel Club gibi bir şirket için bu, kitabın ev stiline uymasını sağlamak anlamına gelir.
+
+Dilbilgisi, kullanım ve stil arasındaki farkı anlamak için bir an duraklamak değer.
+
+Dilbilgisi, bir dilin temel yapısıdır. Bu, İngilizce'de bir cümledeki kelime sırasının neden çok büyük bir fark yarattığını açıklar - örneğin, "köpek adamı ısırır" ve "adam köpeği ısırır" cümleleri. Dilbilgisi sorunu varsa, metin yanlış bir şey iletebilir veya aşırı durumlarda hiçbir şey iletemez.
+
+Kullanım, kelime ve ifadelerin kullanım şeklidir. Bir kitapta bir ifade gördüğünüzde ve "Bu ifadeyi İngilizce'de böyle kullanmıyoruz" veya "Bu kelimenin anlamı yazarın düşündüğü gibi değil" diye düşündüğünüzde, kullanım hakkında soru sormuş olursunuz.
+
+Bir sorun, kullanımın bölgeden bölgeye değişebilmesidir. Klasik bir örnek, Amerikan (yani Amerika Birleşik Devletleri) İngilizcesi ile İngiliz İngilizcesi arasındaki fark - bir İngiliz kitabında bir karakter el fenerini (torch) bir kamyonete (lorry) doğru yöneltir, ancak aynı karakter ABD'de el fenerini (flashlight) bir yarı römorka (semitruck) doğru yöneltir. Ancak, kullanım aynı dilin konuşmacıları arasında da geniş çapta değişebilir. Sasha ve ben ABD'nin farklı bölgelerinde yaşıyoruz ve bazen biri bir ifade önerdiğinde diğeri sadece "Bu ne anlama geliyor?" diyebilir. İkimiz de Amerikan İngilizcesi konuşuyoruz... ama tam olarak aynı dil değil.
+
+Kullanım esnek olabilir; özellikle internetin ortaya çıkmasıyla, birçok konuşmacı diğer bölgelerin bölgesel ifadelerine daha önce olduğundan daha fazla maruz kalabilir. Ancak, hangi tür kelime veya ifadelerin okuyucular tarafından tanınabileceği ve bölgesel bir ifade veya terimin ne zaman kullanılabileceği konusunda her zaman bir soru vardır. Bu, kısmen çevirmen ve editörün düzenleme aşamasında çalışacağı bir şeydir, ancak bir kanıt okuyucu da bir ifade hakkında soru sorabilir.
+
+Stil, metnin görünümü ve okunurluğu etkileyen diğer konularla ilgilidir. Bir noktanın ardından bir boşluk mu yoksa iki boşluk mu bırakılması gibi bir şey, bir stil meselesidir. (İki boşluk, çevirmen ve editörün ilk olarak yazmayı öğrendikleri otuz yıl önce normdu, ancak şimdi bir boşluk standardı haline geldi.) Aynı şekilde, bir listedeki son öğeden önce virgül kullanıp kullanmamak da bir stil meselesidir ("Maomao, Jinshi ve Suiren" yerine "Maomao, Jinshi ve Suiren"). Noktalı virgülden sonra ilk kelimeyi büyük harfle mi yazıyorsunuz? Sayıları yazıyla mı yazıyorsunuz ("yüz" yerine "100"), ve hangilerini? Yabancı kökenli kelimeleri italik mi yazıyorsunuz ("kotatsu, kış günlerinde çok keyifliydi")?
+
+Bu tür sorular, mevcut bir stil kılavuzuna başvurarak cevaplanabilir, örneğin Chicago Manual of Style (CMOS). Genellikle, bir yayıncı belirli bir stil kılavuzunu ana referans kaynağı olarak belirler, ancak aynı zamanda yayınladıkları materyale özgü istisnalar veya özel durumlar listesi de olur - bu, ev stili olarak adlandırılır. Bir dizi de kendi stil sayfasına sahiptir, bu da kendi stil istisnalarının veya genelde yaygın olmayan ancak o dizide sıkça ortaya çıkan stil sorularının listesini içerebilir. Örneğin, Eczane Günlükleri için stil sayfasını, "lady-in-waiting" yerine "lady in waiting" kullanmadığımızı, onursal unvanların tercüme edildiğini (bunları olduğu gibi bırakılmadığını) ve "guest room" ifadesinin iki kelime olduğunu hatırlamak için kullanıyoruz.
+
+Bir kanıt okuyucu, tüm bu açılardan elyazmasını inceleyecektir. Kanıt okuma, bir kitabın yayınlanmadan önce son aşamalardan biridir, bu nedenle bu aşamada yapılan değişiklikler genellikle küçüktür. Yukarıda belirtilen hususlara ek olarak, bir kanıt okuyucu metni açıklığa kavuşturmak için burada ve orada önerilerde bulunabilir, ancak bu aşamada karakter sesi, metnin yapısı vb. konusunda büyük değişiklikler yapılmaz.
+
+J-Novel Club'da, çeviri ekibi kanıt okuyucunun değişikliklerini gözden geçirir ve bunları onaylayabilir veya reddedebilir (editörlerin kullandığı bir terim olan "stet" kelimesini kullanabilir). J-Novel, yayınlanmamış taslağın halka açık olarak yayınlanmasıyla (web sitesinde yayınlanan "prepubs" olarak adlandırılanlar) benzersizdir ve okuyucular bunları yorumlamaya davet edilir. Dolayısıyla, bu aşamada çeviri ekibi aynı zamanda okuyucuların tespit ettiği önemli hataları da dikkate alır! Ayrıca, çeviri tamamlandıktan sonra tüm kitabın nasıl bir araya geldiğini görmek için iyi bir fırsat sunar, çünkü bu, tüm metni bir kez görmek için ilk fırsattır.
+
+Kitap (en azından J-Novel'de) iki kanıt okuma turundan geçer, her biri farklı bir kanıt okuyucu tarafından ele alınır ve çeviri ekibi her turdan sonra değişiklikleri gözden geçirir. Sonra kitap nihai hale getirilir ve nihai epub dosyası oluşturulur. Kanıt okuma aşaması, değişikliklerin nispeten kolay bir şekilde yapılmasına olanak tanıyan son aşamadır. Daha sonra hatalar tespit edilirse, bu durum finishing dosyalarını revize eden ve dijital yayıncılara güncellenmiş sürümler yayınlayan özel bir ekip tarafından ele alınır, bu da değişiklikleri bu aşamada yakalamaktan daha zor hale getirir.
+
+Gördüğünüz gibi, metnin nihai hale gelmeden önce birçok kişinin metni incelemesinin neden iyi bir şey olduğu anlaşılabilir. Kanıt okuyucularının çalışmaları her zaman konuşulmayabilir, ancak katkıları mümkün olduğunca temiz ve parlatılmış bir ürün üretmede çok değerlidir. Eczane Günlükleri yerelleştirme ekibi olarak, her cilt için harcadıkları zaman için teşekkür ederiz!
+
+Bir sonraki seferde, geniş çapta okuyun ve eğlenin!
