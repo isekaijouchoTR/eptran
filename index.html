@@ -76,7 +76,6 @@
       margin-bottom: 1.2rem;
     }
 
-    /* Drop zone */
     #drop-zone {
       border: 2px dashed var(--border);
       border-radius: 6px;
@@ -124,12 +123,12 @@
       font-family: 'JetBrains Mono', monospace;
       font-size: 0.8rem;
       color: var(--yellow);
-      display: flex;
       align-items: center;
       gap: 0.5rem;
     }
 
     #file-info.hidden { display: none !important; }
+    #file-info:not(.hidden) { display: flex; }
 
     #submit-btn {
       margin-top: 1.2rem;
@@ -150,7 +149,6 @@
     #submit-btn:hover:not(:disabled) { opacity: 0.85; }
     #submit-btn:disabled { opacity: 0.4; cursor: not-allowed; }
 
-    /* Status card */
     #status-card { display: none; }
     #status-card.visible { display: block; }
 
@@ -207,20 +205,10 @@
       letter-spacing: 0.05em;
     }
 
-    .badge-running {
-      background: rgba(219, 188, 127, 0.15);
-      color: var(--yellow);
-    }
-
-    .badge-completed {
-      background: rgba(167, 192, 128, 0.15);
-      color: var(--green);
-    }
-
-    .badge-idle {
-      background: rgba(133, 146, 137, 0.15);
-      color: var(--fg-dim);
-    }
+    .badge-running  { background: rgba(219,188,127,0.15); color: var(--yellow); }
+    .badge-completed{ background: rgba(167,192,128,0.15); color: var(--green); }
+    .badge-idle     { background: rgba(133,146,137,0.15); color: var(--fg-dim); }
+    .badge-converting { background: rgba(127,187,179,0.15); color: var(--blue); }
 
     .status-row {
       display: flex;
@@ -229,23 +217,59 @@
       margin-bottom: 1.2rem;
     }
 
-    /* Pulse animation for running */
-    @keyframes pulse {
-      0%, 100% { opacity: 1; }
-      50% { opacity: 0.5; }
-    }
+    @keyframes pulse { 0%,100%{opacity:1} 50%{opacity:.5} }
+    .badge-running, .badge-converting { animation: pulse 2s ease-in-out infinite; }
 
-    .badge-running { animation: pulse 2s ease-in-out infinite; }
-
-    /* Output files */
     #output-section { display: none; }
     #output-section.visible { display: block; }
+
+    /* epub download button */
+    .epub-download {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      padding: 0.75rem 1rem;
+      background: rgba(167,192,128,0.08);
+      border: 1px solid rgba(167,192,128,0.3);
+      border-radius: 6px;
+      margin-bottom: 1rem;
+    }
+
+    .epub-download span {
+      font-family: 'JetBrains Mono', monospace;
+      font-size: 0.82rem;
+      color: var(--green);
+    }
+
+    .epub-download a {
+      padding: 0.35rem 0.9rem;
+      background: var(--green);
+      color: var(--bg);
+      border-radius: 4px;
+      font-family: 'JetBrains Mono', monospace;
+      font-size: 0.78rem;
+      font-weight: 500;
+      text-decoration: none;
+      transition: opacity 0.2s;
+    }
+
+    .epub-download a:hover { opacity: 0.85; }
+
+    .epub-converting {
+      padding: 0.6rem 1rem;
+      background: rgba(127,187,179,0.08);
+      border: 1px dashed rgba(127,187,179,0.3);
+      border-radius: 6px;
+      margin-bottom: 1rem;
+      font-family: 'JetBrains Mono', monospace;
+      font-size: 0.8rem;
+      color: var(--blue);
+    }
 
     .output-list {
       display: flex;
       flex-direction: column;
       gap: 0.5rem;
-      margin-top: 0.5rem;
     }
 
     .output-item {
@@ -268,13 +292,12 @@
 
     .output-item a:hover { text-decoration: underline; }
 
-    /* Error */
     #error-msg {
       display: none;
       margin-top: 0.8rem;
       padding: 0.6rem 0.9rem;
-      background: rgba(230, 126, 128, 0.1);
-      border: 1px solid rgba(230, 126, 128, 0.3);
+      background: rgba(230,126,128,0.1);
+      border: 1px solid rgba(230,126,128,0.3);
       border-radius: 4px;
       font-size: 0.82rem;
       color: var(--red);
@@ -283,7 +306,6 @@
 
     #error-msg.visible { display: block; }
 
-    /* Updated at */
     .updated-at {
       font-size: 0.72rem;
       color: var(--fg-dim);
@@ -312,7 +334,6 @@
   <p>epub → türkçe çeviri</p>
 </header>
 
-<!-- Upload card -->
 <div class="card" id="upload-card">
   <div class="card-title">kitap yükle</div>
 
@@ -333,7 +354,6 @@
   <div id="error-msg"></div>
 </div>
 
-<!-- Status card -->
 <div class="card" id="status-card">
   <div class="card-title">çeviri durumu</div>
 
@@ -354,31 +374,30 @@
   <div class="updated-at" id="updated-at"></div>
 </div>
 
-<!-- Output section -->
 <div class="card" id="output-section">
   <div class="card-title">çıktı dosyaları</div>
+  <div id="epub-area"></div>
   <div class="output-list" id="output-list"></div>
 </div>
 
 <footer>
   <a href="https://github.com/search?q=eptran" target="_blank">github</a>
-  &nbsp;·&nbsp; gemini 2.0 flash
+  &nbsp;·&nbsp; groq llama-3.3-70b
 </footer>
 
 <script>
-  const dropZone = document.getElementById('drop-zone');
-  const fileInput = document.getElementById('file-input');
-  const fileInfo = document.getElementById('file-info');
+  const dropZone    = document.getElementById('drop-zone');
+  const fileInput   = document.getElementById('file-input');
+  const fileInfo    = document.getElementById('file-info');
   const fileNameLabel = document.getElementById('file-name-label');
-  const submitBtn = document.getElementById('submit-btn');
-  const errorMsg = document.getElementById('error-msg');
-  const statusCard = document.getElementById('status-card');
+  const submitBtn   = document.getElementById('submit-btn');
+  const errorMsg    = document.getElementById('error-msg');
+  const statusCard  = document.getElementById('status-card');
   const outputSection = document.getElementById('output-section');
 
   let selectedFile = null;
   let pollInterval = null;
 
-  // Drag & drop
   dropZone.addEventListener('dragover', e => { e.preventDefault(); dropZone.classList.add('drag-over'); });
   dropZone.addEventListener('dragleave', () => dropZone.classList.remove('drag-over'));
   dropZone.addEventListener('drop', e => {
@@ -411,19 +430,15 @@
     hideError();
 
     try {
-      // 1. Credentials al
       const credsRes = await fetch('/api/creds');
       if (!credsRes.ok) throw new Error('Credentials alınamadı');
       const { repo, branch, pat } = await credsRes.json();
 
-      // 2. Dosyayı base64'e çevir
       submitBtn.textContent = 'Dosya okunuyor...';
       const base64 = await toBase64(selectedFile);
 
-      // 3. Direkt GitHub API'ye yükle (Vercel limiti yok)
       submitBtn.textContent = "GitHub'a yükleniyor...";
 
-      // Dosya zaten varsa sha al (güncelleme için gerekli)
       let existingSha;
       const checkRes = await fetch(
         `https://api.github.com/repos/${repo}/contents/input/${selectedFile.name}`,
@@ -458,7 +473,6 @@
         throw new Error(err.message || 'GitHub yükleme başarısız');
       }
 
-      // 4. Workflow tetikle
       submitBtn.textContent = 'Çeviri başlatılıyor...';
       const triggerRes = await fetch('/api/trigger', { method: 'POST' });
       const triggerData = await triggerRes.json();
@@ -496,27 +510,32 @@
       const data = await res.json();
       updateStatusUI(data);
 
-      if (data.status === 'completed' || data.status === 'idle') {
-        clearInterval(pollInterval);
-      }
+      // Stop polling only when epub is ready (or fully idle with no epub)
+      const done = data.status === 'completed' && (data.epubFile || data.convert_status === 'completed');
+      const idle = data.status === 'idle';
+      if (done || idle) clearInterval(pollInterval);
     } catch (err) {
       console.error('Status fetch error:', err);
     }
   }
 
   function updateStatusUI(data) {
-    const badge = document.getElementById('status-badge');
-    const bookEl = document.getElementById('status-book');
+    const badge     = document.getElementById('status-badge');
+    const bookEl    = document.getElementById('status-book');
     const chapterEl = document.getElementById('status-chapter');
-    const countEl = document.getElementById('status-count');
-    const fill = document.getElementById('progress-fill');
+    const countEl   = document.getElementById('status-count');
+    const fill      = document.getElementById('progress-fill');
     const updatedAt = document.getElementById('updated-at');
+    const epubArea  = document.getElementById('epub-area');
 
-    // Status badge
     badge.className = 'status-badge';
+
     if (data.status === 'running') {
       badge.classList.add('badge-running');
       badge.textContent = 'çalışıyor';
+    } else if (data.status === 'completed' && data.convert_status === 'running') {
+      badge.classList.add('badge-converting');
+      badge.textContent = 'epub oluşturuluyor';
     } else if (data.status === 'completed') {
       badge.classList.add('badge-completed');
       badge.textContent = 'tamamlandı';
@@ -538,9 +557,28 @@
       updatedAt.textContent = 'güncellendi: ' + d.toLocaleString('tr-TR');
     }
 
-    // Output files
-    if (data.outputFiles && data.outputFiles.length > 0) {
+    // Show output section if there's anything to show
+    if (data.epubFile || (data.outputFiles && data.outputFiles.length > 0) || data.convert_status === 'running') {
       outputSection.classList.add('visible');
+    }
+
+    // epub download area
+    if (data.epubFile) {
+      epubArea.innerHTML = `
+        <div class="epub-download">
+          <span>📖 ${data.epubFile.name}</span>
+          <a href="${data.epubFile.download_url}" target="_blank">epub indir</a>
+        </div>`;
+    } else if (data.status === 'completed' && data.convert_status === 'running') {
+      epubArea.innerHTML = `<div class="epub-converting">⏳ epub oluşturuluyor...</div>`;
+    } else if (data.status === 'completed' && !data.epubFile) {
+      epubArea.innerHTML = `<div class="epub-converting">⏳ epub bekleniyor...</div>`;
+    } else {
+      epubArea.innerHTML = '';
+    }
+
+    // txt files
+    if (data.outputFiles && data.outputFiles.length > 0) {
       const list = document.getElementById('output-list');
       list.innerHTML = data.outputFiles
         .map(f => `
@@ -561,7 +599,6 @@
     errorMsg.classList.remove('visible');
   }
 
-  // On page load, check status
   window.addEventListener('load', async () => {
     try {
       const res = await fetch('/api/status');
@@ -569,7 +606,7 @@
       if (data.status === 'running' || data.status === 'completed') {
         statusCard.classList.add('visible');
         updateStatusUI(data);
-        if (data.status === 'running') {
+        if (data.status === 'running' || data.convert_status === 'running') {
           submitBtn.textContent = 'Çeviri Devam Ediyor';
           submitBtn.disabled = true;
           startPolling();
