@@ -1,0 +1,93 @@
+# Character Profiles
+
+Bölüm: Karakter Profilleri
+
+Karakter Profilleri
+
+Maomao
+
+Eski bir eğlence bölgesinin eczacısı. Arka saray ve imparatorluk mahkemesinde çalıştıktan sonra, şimdi tıp ofisinin asistanı olarak görev yapıyor. Eskiden çok huysuzdu, ama şimdi çok daha yumuşak bir hale geldi. Yine de her türlü ilaç ve zehirle ilgili olan sevgisini ve biyolojik babası Lakan'a karşı olan nefretini koruyor. Sonunda Jinshi'nin hislerine ciddi olarak ilgi göstermeye başladı. Yirmi bir yaşında.
+
+Jinshi
+
+İmparator'un küçük kardeşi. İnsanüstü güzelliğe sahip. Şaşırtıcı güzelliği, doğrudan kişiliğiyle çelişiyor ve bu uyumsuzluk yanlış anlaşılmalara neden olabiliyor. Gelecek hayatında Lahan'ın Kardeşi gibi olmak istiyor. Gerçek adı: Ka Zuigetsu. Yirmi iki yaşında.
+
+Basen
+
+Gaoshun'un oğlu; Jinshi'nin hizmetkarı. Eski konsort Lishu'ya karşı hisler besliyor. Bazen erkek kıyafetleri giyen bir ayı olarak anılıyor. Yirmi iki yaşında.
+
+Chue
+
+Gaoshun'un oğlu Baryou'nun karısı. Aptalca davranıyor, ama Mi klanının bir üyesi ve istihbarat toplamakta uzman. Maomao'yu kurtarmaya çalışırken çok ciddi yaralar alıyor ve Jinshi'nin hizmetkarı olarak görev yapmaktan vazgeçmek zorunda kalıyor.
+
+Gaoshun
+
+İyi yapıda bir asker, eskiden Jinshi'nin hizmetkarıydı, ama şimdi İmparator'a doğrudan hizmet ediyor. Karısı Taomei, Jinshi'nin hizmetkarı ve kocasını tamamen kontrolü altında tutuyor.
+
+Lahan
+
+Lahan'ın Kardeşi'nin küçük kardeşi. Küçük bir adam ve yuvarlak gözlükleri var, ama nedense kadınlar arasında popüler. Sayılarla ilgili konularda uzman ve olayların gidişatını iyi biliyor.
+
+Lahan'ın Kardeşi
+
+Lahan'ın büyük kardeşi. Aslında çok yetenekli bir kişi, ama bunu fark etmediği için her zaman kısa gelen taraf oluyor. Artık kimsenin gerçek adını söylemesini beklemeyi bırakmıştı. Tarım yeteneğine sahip.
+
+Lakan
+
+Kızı Maomao'ya çok düşkün. Luomen'in yeğeni. Tek gözlü bir manyak, ama askeriye'nin en yüksek rütbesi olan Grand Komutan'ı elinde bulunduruyor. Şeker bağımlısı, ama alkolü kaldıramıyor.
+
+Lihaku
+
+İriyarı bir asker. Herkesin büyük kardeşi gibi. Pairin'in sözleşmesini satın almak umuduyla bekliyor.
+
+Suiren
+
+Jinshi'nin hizmetkarı ve eski süt annesi. Jinshi'ye karşı çok yumuşak.
+
+İmparatoriçe Gyokuyou
+
+İmparator'un yasal eşi. Kırmızı saçları ve yeşil gözleri olan egzotik bir güzelliğe sahip. Veliaht Prensin annesi, ama batı başkentinden geldiği için birçok kişi onu görevine uygun bulmuyor. Yirmi üç yaşında.
+
+Yao
+
+Maomao'nun meslektaşı ve Bakan Lu'nun yeğeni. Dünyayla ilgili çok şey bilmiyor, ama kendi başına yoluna devam etmeye çalışıyor. Son zamanlarda Lahan'a karşı ilgi göstermeye başladı. On yedi yaşında.
+
+En'en
+
+Maomao'nun meslektaşı ve aynı zamanda Yao'nun hizmetkarı. Yao için yaşıyor, ama Yao'nun hala kendi başına olmadığını sağlayan büyük bir neden de o. Yao'nun Lahan'a ilgi göstermesini görmek onu çok rahatsız ediyor. Yirmi bir yaşında.
+
+Tianyu
+
+Genç bir hekim. Özellikle cesetler ve otopsiyle ilgili tehlikeli bir karakter. Kada'nın torunu olduğu söyleniyor.
+
+Maamei
+
+Basen'in büyük kız kardeşi. Annesi ve babası Taomei ve Gaoshun western başkentte olduğu için, Ma klanının işlerini yönetmek ona düştü. Güçlü bir karakter olabilir.
+
+Dr. Liu
+
+Üst düzey bir hekim. Luomen ile uzun süredir arkadaş. Maomao ve arkadaşlarına sert talimatlar veriyor.
+
+Dr. Li
+
+Orta düzey bir hekim. Maomao ve diğerleriyle birlikte batı başkentine gitti ve orada yaşadıkları onu güçlendirdi.
+
+Joka
+
+Verdigris Evi'ndeki Üç Prenses'ten biri. Dört Klasik ve Beş Kitap'ı ezbere biliyor. Kırık bir jade tableti sahip.
+
+Pairin
+
+Verdigris Evi'ndeki Üç Prenses'ten biri. Göğsü bol bir kadın ve dans yeteneğine sahip.
+
+Lishu
+
+Eski bir konsort, U klanından geliyor. Şu anda bir manastırda yaşıyor.
+
+Ah-Duo
+
+İmparator'un eski bir arkadaşı ve eski bir konsortu. Bir oğulları var. Otuz dokuz yaşında.
+
+Kokuyou
+
+Yüzünde çiçek hastalığı izleri olan genç bir adam. Çok neşeli ve mükemmel bir doktor.
