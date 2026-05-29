@@ -1,0 +1,62 @@
+name: Convert to EPUB
+
+on:
+  workflow_run:
+    workflows: ["Translate Novel"]
+    types:
+      - completed
+
+jobs:
+  convert:
+    runs-on: ubuntu-latest
+    if: ${{ github.event.workflow_run.conclusion == 'success' }}
+    timeout-minutes: 30
+    permissions:
+      contents: write
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+        with:
+          token: ${{ secrets.GITHUB_TOKEN }}
+          ref: main
+
+      - name: Pull latest changes
+        run: git pull origin main
+
+      - name: Check if conversion needed
+        id: check
+        run: |
+          STATUS=$(python3 -c "
+          import json, sys
+          try:
+              with open('status.json') as f:
+                  s = json.load(f)
+              if s.get('status') == 'completed' and s.get('convert_status') not in ('running', 'completed'):
+                  print('yes')
+              else:
+                  print('no')
+          except:
+              print('no')
+          ")
+          echo "needed=$STATUS" >> $GITHUB_OUTPUT
+
+      - name: Setup Python
+        if: steps.check.outputs.needed == 'yes'
+        uses: actions/setup-python@v5
+        with:
+          python-version: "3.11"
+
+      - name: Install dependencies
+        if: steps.check.outputs.needed == 'yes'
+        run: pip install -r requirements.txt
+
+      - name: Configure git
+        if: steps.check.outputs.needed == 'yes'
+        run: |
+          git config user.name "eptran-bot"
+          git config user.email "eptran-bot@users.noreply.github.com"
+
+      - name: Run conversion
+        if: steps.check.outputs.needed == 'yes'
+        run: python scripts/convert.py
