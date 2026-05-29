@@ -11,7 +11,6 @@ export default async function handler(req, res) {
     return res.status(500).json({ error: "Sunucu yapılandırması eksik" });
 
   try {
-    // Fetch status.json
     const statusRes = await fetch(
       `https://api.github.com/repos/${REPO}/contents/status.json`,
       { headers: { Authorization: `token ${TOKEN}` } }
@@ -24,8 +23,9 @@ export default async function handler(req, res) {
     const data = await statusRes.json();
     const status = JSON.parse(Buffer.from(data.content, "base64").toString());
 
-    // Also fetch output file list if completed
     let outputFiles = [];
+    let epubFile = null;
+
     if (status.status === "completed" && status.book) {
       const outputRes = await fetch(
         `https://api.github.com/repos/${REPO}/contents/output/${status.book}`,
@@ -33,13 +33,21 @@ export default async function handler(req, res) {
       );
       if (outputRes.ok) {
         const files = await outputRes.json();
+
+        // txt files
         outputFiles = files
           .filter((f) => f.name.endsWith(".txt"))
           .map((f) => ({ name: f.name, download_url: f.download_url }));
+
+        // epub output (built by convert.py)
+        const epubEntry = files.find((f) => f.name.endsWith("_tr.epub"));
+        if (epubEntry) {
+          epubFile = { name: epubEntry.name, download_url: epubEntry.download_url };
+        }
       }
     }
 
-    return res.json({ ...status, outputFiles });
+    return res.json({ ...status, outputFiles, epubFile });
   } catch (err) {
     console.error(err);
     return res.status(500).json({ error: "Sunucu hatası" });
