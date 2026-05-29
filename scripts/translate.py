@@ -1,5 +1,6 @@
 import os
 import json
+import shutil
 import subprocess
 import ebooklib
 from ebooklib import epub
@@ -79,10 +80,9 @@ def chunk_text(text, max_chars=12000):
 
 
 def parse_retry_seconds(error_message):
-    """Hata mesajından bekleme süresini saniyeye çevir."""
     match = re.search(r'try again in ([\dhms .]+)', str(error_message))
     if not match:
-        return 3600  # varsayılan 1 saat
+        return 3600
 
     time_str = match.group(1).strip()
     total = 0
@@ -93,7 +93,7 @@ def parse_retry_seconds(error_message):
     for s in re.findall(r'([\d.]+)s', time_str):
         total += float(s)
 
-    return int(total) + 10  # 10 saniye tampon
+    return int(total) + 10
 
 
 def translate_chunk(client, text, chapter_title, chunk_index, total_chunks):
@@ -124,6 +124,16 @@ def translate_chunk(client, text, chapter_title, chunk_index, total_chunks):
             time.sleep(30)
 
 
+def backup_epub(epub_path, book_slug):
+    """Save a copy of the original epub for later use by convert.py."""
+    backup_dir = "input/.originals"
+    os.makedirs(backup_dir, exist_ok=True)
+    backup_path = f"{backup_dir}/{book_slug}.epub"
+    shutil.copy2(epub_path, backup_path)
+    print(f"Orijinal epub yedeklendi: {backup_path}")
+    return backup_path
+
+
 def main():
     client = Groq(api_key=GROQ_API_KEY)
 
@@ -142,12 +152,14 @@ def main():
     total = len(chapters)
     print(f"Toplam bölüm: {total}")
 
-    # Kaldığı yerden devam et
     output_dir = f"output/{book_slug}"
     os.makedirs(output_dir, exist_ok=True)
     completed_start = len([f for f in os.listdir(output_dir) if f.endswith(".txt")]) if os.path.exists(output_dir) else 0
     if completed_start > 0:
         print(f"Kaldığı yerden devam: {completed_start}/{total}")
+
+    # Backup the original epub before anything else so convert.py can use images later
+    backup_epub(epub_path, book_slug)
 
     status = {
         "status": "running",
@@ -161,7 +173,6 @@ def main():
     write_status(status)
 
     for i, chapter in enumerate(chapters):
-        # Zaten çevrilmişse atla
         out_path = f"{output_dir}/{i+1:03d}_{book_slug}.txt"
         if os.path.exists(out_path):
             print(f"[{i+1}/{total}] Atlanıyor (zaten mevcut): {chapter['title']}")
