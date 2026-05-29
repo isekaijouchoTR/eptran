@@ -1,10 +1,10 @@
 {
-  "status": "completed",
-  "book": "knhv13",
-  "epub_file": "knhv13.epub",
-  "total": 25,
-  "completed": 25,
+  "status": "running",
+  "book": "ksnh14",
+  "epub_file": "ksnh14.epub",
+  "total": 34,
+  "completed": 0,
   "current_chapter": "",
-  "started_at": "2026-05-26T02:45:56.284641+00:00",
-  "updated_at": "2026-05-26T02:46:48.678933+00:00"
+  "started_at": "2026-05-29T20:22:50.636237+00:00",
+  "updated_at": "2026-05-29T20:22:50.636258+00:00"
 }
