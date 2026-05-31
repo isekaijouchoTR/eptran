@@ -2,12 +2,12 @@ import os
 import re
 import json
 import subprocess
-from pathlib import Path
 from datetime import datetime, timezone
 
 import ebooklib
 from ebooklib import epub
 from bs4 import BeautifulSoup
+from lxml import etree
 
 
 STATUS_FILE = "status.json"
@@ -36,6 +36,10 @@ def write_status(data):
     git_push(f"convert: {data.get('convert_status', '')}")
 
 
+def normalize(s):
+    return re.sub(r'\W+', '', s.lower())
+
+
 def load_txt_chapters(output_dir):
     """Load translated txt files in order."""
     txt_files = sorted(
@@ -47,7 +51,6 @@ def load_txt_chapters(output_dir):
         with open(path, encoding="utf-8") as f:
             content = f.read()
 
-        # İlk satır # ile başlıyorsa başlık olarak al, body geri kalan
         lines = content.split("\n", 2)
         if lines[0].startswith("#"):
             raw_title = lines[0].lstrip("#").strip()
@@ -56,20 +59,12 @@ def load_txt_chapters(output_dir):
             raw_title = fname
             body_raw = content.strip()
 
-        # Body'nin ilk satırı başlığın çevirisi ise (tekrar eden başlık), atla
         body_lines = body_raw.split("\n", 1)
         first_line = body_lines[0].strip()
 
-        # Eğer ilk satır başlığa çok benziyorsa (aynı veya çok kısa fark) atla
-        def normalize(s):
-            return re.sub(r'\W+', '', s.lower())
-
         if normalize(first_line) and normalize(first_line) == normalize(raw_title):
-            # Tekrar eden başlığı atla
             body_raw = body_lines[1].strip() if len(body_lines) > 1 else ""
         elif normalize(first_line) and len(first_line) < 120 and not first_line.endswith((".", "!", "?", "…")):
-            # İlk satır kısa ve noktalama ile bitmiyor → muhtemelen başlık çevirisi
-            # Bunu gerçek başlık olarak kullan, orijinal İngilizce başlığı geç
             raw_title = first_line
             body_raw = body_lines[1].strip() if len(body_lines) > 1 else ""
 
@@ -78,7 +73,6 @@ def load_txt_chapters(output_dir):
 
 
 def text_to_xhtml(title, body):
-    """Convert plain text body to XHTML content."""
     paragraphs = []
     for para in body.split("\n\n"):
         para = para.strip()
@@ -117,23 +111,32 @@ def find_original_epub(book_slug):
     return None
 
 
-def extract_cover_image(epub_path):
-    book = epub.read_epub(epub_path)
-    for item in book.get_items():
+def get_spine_order(original_book):
+    """Spine sırasına göre item listesi döndür."""
+    # ebooklib'in spine özelliğini kullan
+    spine_ids = [idref for idref, _ in original_book.spine]
+    items_by_id = {item.id: item for item in original_book.get_items()}
+    ordered = []
+    for sid in spine_ids:
+        if sid in items_by_id:
+            ordered.append(items_by_id[sid])
+    return ordered
+
+
+def extract_cover_image(original_book):
+    for item in original_book.get_items():
         if item.get_type() == ebooklib.ITEM_IMAGE:
             if "cover" in item.get_name().lower():
                 return item
-    for item in book.get_items():
+    for item in original_book.get_items():
         if item.get_type() == ebooklib.ITEM_IMAGE:
             return item
     return None
 
 
 def build_epub(book_slug, chapters, original_epub_path, output_path):
-    """Build epub, preserving original item order so images stay in place."""
     book = epub.EpubBook()
     book.set_identifier(f"eptran-{book_slug}-tr")
-    book.set_title(book_slug.replace("_", " "))
     book.set_language("tr")
     book.add_author("eptran")
 
@@ -141,6 +144,11 @@ def build_epub(book_slug, chapters, original_epub_path, output_path):
 
     if original_epub_path and os.path.exists(original_epub_path):
         original_book = epub.read_epub(original_epub_path)
+
+        # Kitap adını metadata'dan al
+        title_meta = original_book.get_metadata('DC', 'title')
+        book_title = title_meta[0][0] if title_meta else book_slug.replace("_", " ")
+        book.set_title(book_title)
 
         # Tüm görselleri ekle
         for item in original_book.get_items():
@@ -154,13 +162,15 @@ def build_epub(book_slug, chapters, original_epub_path, output_path):
                 book.add_item(img_item)
 
         # Kapağı ayarla
-        cover_item = extract_cover_image(original_epub_path)
+        cover_item = extract_cover_image(original_book)
         if cover_item:
             book.set_cover(cover_item.get_name(), cover_item.get_content())
 
-        # Orijinal sırayı koruyarak bölümleri ve illustrasyonları yerleştir
+        # SPINE sırasıyla geç — insert'ler doğru yerde olsun
+        spine_items = get_spine_order(original_book)
         chapter_index = 0
-        for item in original_book.get_items():
+
+        for item in spine_items:
             if item.get_type() != ebooklib.ITEM_DOCUMENT:
                 continue
 
@@ -169,14 +179,18 @@ def build_epub(book_slug, chapters, original_epub_path, output_path):
                 tag.decompose()
             text = soup.get_text().strip()
             imgs = soup.find_all("img")
+            item_name = item.get_name()
+            safe_name = item_name.replace('/', '_').replace('.', '_')
 
-            safe_name = item.get_name().replace('/', '_').replace('.', '_')
+            # insert*.xhtml veya görsel ağırlıklı sayfa → orijinali koru
+            base = os.path.basename(item_name).lower()
+            is_insert = base.startswith("insert") or base.startswith("frontmatter") or base.startswith("bonus")
+            is_image_page = imgs and len(text) < 300
 
-            if imgs and len(text) < 200:
-                # Illustrasyon sayfası → orijinali koru, yerinde bırak
+            if is_insert or is_image_page:
                 ill_item = epub.EpubHtml(
-                    title="İllüstrasyon",
-                    file_name=f"Text/illus_{safe_name}.xhtml",
+                    title="",
+                    file_name=f"Text/orig_{safe_name}.xhtml",
                     lang="tr",
                 )
                 ill_item.set_content(item.get_content())
@@ -199,7 +213,7 @@ def build_epub(book_slug, chapters, original_epub_path, output_path):
                 epub_items.append(epub_ch)
 
             else:
-                # Kısa sayfa (telif, boş vb.) → orijinali koru
+                # Kısa sayfa (telif, toc, signup vb.) → orijinali koru
                 short_item = epub.EpubHtml(
                     title="",
                     file_name=f"Text/short_{safe_name}.xhtml",
@@ -209,9 +223,12 @@ def build_epub(book_slug, chapters, original_epub_path, output_path):
                 book.add_item(short_item)
                 epub_items.append(short_item)
 
+        if chapter_index < len(chapters):
+            print(f"Uyarı: {len(chapters) - chapter_index} bölüm eşleştirilemedi.")
+
     else:
-        # Orijinal epub yoksa sadece çeviri bölümleri
         print("Orijinal epub bulunamadı — görselsiz epub oluşturulacak.")
+        book.set_title(book_slug.replace("_", " "))
         for i, ch in enumerate(chapters):
             ch_id = f"chapter_{i+1:03d}"
             xhtml = text_to_xhtml(ch["title"], ch["body"])
@@ -241,9 +258,8 @@ img { max-width: 100%; display: block; margin: auto; }
 
     book.toc = tuple(
         epub.Link(ch.file_name, ch.title, ch.id) for ch in epub_items
-        if not ch.file_name.startswith("Text/illus_")
+        if ch.title and not ch.file_name.startswith("Text/orig_")
         and not ch.file_name.startswith("Text/short_")
-        and ch.title
     )
 
     book.add_item(epub.EpubNcx())
