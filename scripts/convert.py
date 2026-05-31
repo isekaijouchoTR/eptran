@@ -46,11 +46,34 @@ def load_txt_chapters(output_dir):
         path = os.path.join(output_dir, fname)
         with open(path, encoding="utf-8") as f:
             content = f.read()
-        # Extract title from first line if starts with #
+
+        # İlk satır # ile başlıyorsa başlık olarak al, body geri kalan
         lines = content.split("\n", 2)
-        title = lines[0].lstrip("#").strip() if lines[0].startswith("#") else fname
-        body = lines[2].strip() if len(lines) > 2 else content
-        chapters.append({"filename": fname, "title": title, "body": body})
+        if lines[0].startswith("#"):
+            raw_title = lines[0].lstrip("#").strip()
+            body_raw = lines[2].strip() if len(lines) > 2 else ""
+        else:
+            raw_title = fname
+            body_raw = content.strip()
+
+        # Body'nin ilk satırı başlığın çevirisi ise (tekrar eden başlık), atla
+        body_lines = body_raw.split("\n", 1)
+        first_line = body_lines[0].strip()
+
+        # Eğer ilk satır başlığa çok benziyorsa (aynı veya çok kısa fark) atla
+        def normalize(s):
+            return re.sub(r'\W+', '', s.lower())
+
+        if normalize(first_line) and normalize(first_line) == normalize(raw_title):
+            # Tekrar eden başlığı atla
+            body_raw = body_lines[1].strip() if len(body_lines) > 1 else ""
+        elif normalize(first_line) and len(first_line) < 120 and not first_line.endswith((".", "!", "?", "…")):
+            # İlk satır kısa ve noktalama ile bitmiyor → muhtemelen başlık çevirisi
+            # Bunu gerçek başlık olarak kullan, orijinal İngilizce başlığı geç
+            raw_title = first_line
+            body_raw = body_lines[1].strip() if len(body_lines) > 1 else ""
+
+        chapters.append({"filename": fname, "title": raw_title, "body": body_raw})
     return chapters
 
 
@@ -61,13 +84,11 @@ def text_to_xhtml(title, body):
         para = para.strip()
         if not para:
             continue
-        # Subheadings (lines starting with ##)
         if para.startswith("## "):
             paragraphs.append(f"<h2>{para[3:].strip()}</h2>")
         elif para.startswith("# "):
             paragraphs.append(f"<h2>{para[2:].strip()}</h2>")
         else:
-            # Preserve line breaks within a paragraph
             lines = para.split("\n")
             joined = "<br/>".join(line.strip() for line in lines if line.strip())
             paragraphs.append(f"<p>{joined}</p>")
@@ -90,34 +111,18 @@ def text_to_xhtml(title, body):
 
 
 def find_original_epub(book_slug):
-    """Try to find the original epub from input/ or a backup location."""
-    # The original is deleted after translation, so we store a backup
     backup_path = f"input/.originals/{book_slug}.epub"
     if os.path.exists(backup_path):
         return backup_path
     return None
 
 
-def extract_images_from_epub(epub_path):
-    """Extract all image items from an epub."""
-    book = epub.read_epub(epub_path)
-    images = {}
-    for item in book.get_items():
-        if item.get_type() == ebooklib.ITEM_IMAGE:
-            images[item.get_name()] = item
-    return images
-
-
 def extract_cover_image(epub_path):
-    """Try to find the cover image from the original epub."""
     book = epub.read_epub(epub_path)
-    # Try metadata cover
     for item in book.get_items():
         if item.get_type() == ebooklib.ITEM_IMAGE:
-            name_lower = item.get_name().lower()
-            if "cover" in name_lower:
+            if "cover" in item.get_name().lower():
                 return item
-    # Fallback: first image
     for item in book.get_items():
         if item.get_type() == ebooklib.ITEM_IMAGE:
             return item
@@ -125,7 +130,7 @@ def extract_cover_image(epub_path):
 
 
 def build_epub(book_slug, chapters, original_epub_path, output_path):
-    """Build a new epub from translated chapters, reusing original images."""
+    """Build epub, preserving original item order so images stay in place."""
     book = epub.EpubBook()
     book.set_identifier(f"eptran-{book_slug}-tr")
     book.set_title(book_slug.replace("_", " "))
@@ -133,71 +138,93 @@ def build_epub(book_slug, chapters, original_epub_path, output_path):
     book.add_author("eptran")
 
     epub_items = []
-    images_added = set()
 
-    # Load images from original epub if available
-    original_images = {}
-    original_book = None
     if original_epub_path and os.path.exists(original_epub_path):
         original_book = epub.read_epub(original_epub_path)
+
+        # Tüm görselleri ekle
         for item in original_book.get_items():
-            if item.get_type() == ebooklib.ITEM_IMAGE:
-                original_images[item.get_name()] = item
-            if item.get_type() == ebooklib.ITEM_COVER:
-                original_images[item.get_name()] = item
+            if item.get_type() in (ebooklib.ITEM_IMAGE, ebooklib.ITEM_COVER):
+                img_item = epub.EpubItem(
+                    uid=f"img_{item.get_name().replace('/', '_').replace('.', '_')}",
+                    file_name=item.get_name(),
+                    media_type=item.media_type,
+                    content=item.get_content(),
+                )
+                book.add_item(img_item)
 
-        # Add all images from original epub
-        for name, item in original_images.items():
-            img_item = epub.EpubItem(
-                uid=f"img_{name.replace('/', '_').replace('.', '_')}",
-                file_name=name,
-                media_type=item.media_type,
-                content=item.get_content(),
-            )
-            book.add_item(img_item)
-            images_added.add(name)
-
-        # Try to set cover
+        # Kapağı ayarla
         cover_item = extract_cover_image(original_epub_path)
         if cover_item:
             book.set_cover(cover_item.get_name(), cover_item.get_content())
 
-    # Add chapters
-    for i, ch in enumerate(chapters):
-        ch_id = f"chapter_{i+1:03d}"
-        xhtml = text_to_xhtml(ch["title"], ch["body"])
-
-        epub_ch = epub.EpubHtml(
-            title=ch["title"],
-            file_name=f"Text/{ch_id}.xhtml",
-            lang="tr",
-        )
-        epub_ch.set_content(xhtml.encode("utf-8"))
-        book.add_item(epub_ch)
-        epub_items.append(epub_ch)
-
-    # Also import image-only pages from original epub (illustration pages)
-    if original_book:
+        # Orijinal sırayı koruyarak bölümleri ve illustrasyonları yerleştir
+        chapter_index = 0
         for item in original_book.get_items():
             if item.get_type() != ebooklib.ITEM_DOCUMENT:
                 continue
+
             soup = BeautifulSoup(item.get_content(), "html.parser")
+            for tag in soup(["script", "style", "nav"]):
+                tag.decompose()
             text = soup.get_text().strip()
             imgs = soup.find_all("img")
-            # If page has images but minimal text → keep as illustration page
+
+            safe_name = item.get_name().replace('/', '_').replace('.', '_')
+
             if imgs and len(text) < 200:
-                ill_id = f"illus_{item.get_name().replace('/', '_').replace('.', '_')}"
-                # Rewrite img src to use correct relative paths
+                # Illustrasyon sayfası → orijinali koru, yerinde bırak
                 ill_item = epub.EpubHtml(
                     title="İllüstrasyon",
-                    file_name=f"Text/illus_{ill_id}.xhtml",
+                    file_name=f"Text/illus_{safe_name}.xhtml",
                     lang="tr",
                 )
                 ill_item.set_content(item.get_content())
                 book.add_item(ill_item)
                 epub_items.append(ill_item)
 
-    # Default CSS
+            elif len(text) >= 300 and chapter_index < len(chapters):
+                # Metin sayfası → çevrilmiş bölümle değiştir
+                ch = chapters[chapter_index]
+                chapter_index += 1
+                ch_id = f"chapter_{chapter_index:03d}"
+                xhtml = text_to_xhtml(ch["title"], ch["body"])
+                epub_ch = epub.EpubHtml(
+                    title=ch["title"],
+                    file_name=f"Text/{ch_id}.xhtml",
+                    lang="tr",
+                )
+                epub_ch.set_content(xhtml.encode("utf-8"))
+                book.add_item(epub_ch)
+                epub_items.append(epub_ch)
+
+            else:
+                # Kısa sayfa (telif, boş vb.) → orijinali koru
+                short_item = epub.EpubHtml(
+                    title="",
+                    file_name=f"Text/short_{safe_name}.xhtml",
+                    lang="tr",
+                )
+                short_item.set_content(item.get_content())
+                book.add_item(short_item)
+                epub_items.append(short_item)
+
+    else:
+        # Orijinal epub yoksa sadece çeviri bölümleri
+        print("Orijinal epub bulunamadı — görselsiz epub oluşturulacak.")
+        for i, ch in enumerate(chapters):
+            ch_id = f"chapter_{i+1:03d}"
+            xhtml = text_to_xhtml(ch["title"], ch["body"])
+            epub_ch = epub.EpubHtml(
+                title=ch["title"],
+                file_name=f"Text/{ch_id}.xhtml",
+                lang="tr",
+            )
+            epub_ch.set_content(xhtml.encode("utf-8"))
+            book.add_item(epub_ch)
+            epub_items.append(epub_ch)
+
+    # CSS
     css = epub.EpubItem(
         uid="style_default",
         file_name="Style/default.css",
@@ -215,11 +242,12 @@ img { max-width: 100%; display: block; margin: auto; }
     book.toc = tuple(
         epub.Link(ch.file_name, ch.title, ch.id) for ch in epub_items
         if not ch.file_name.startswith("Text/illus_")
+        and not ch.file_name.startswith("Text/short_")
+        and ch.title
     )
 
     book.add_item(epub.EpubNcx())
     book.add_item(epub.EpubNav())
-
     book.spine = ["nav"] + epub_items
 
     os.makedirs(os.path.dirname(output_path), exist_ok=True)
