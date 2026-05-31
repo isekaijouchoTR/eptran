@@ -125,7 +125,6 @@ def translate_chunk(client, text, chapter_title, chunk_index, total_chunks):
 
 
 def backup_epub(epub_path, book_slug):
-    """Save a copy of the original epub for later use by convert.py."""
     backup_dir = "input/.originals"
     os.makedirs(backup_dir, exist_ok=True)
     backup_path = f"{backup_dir}/{book_slug}.epub"
@@ -137,9 +136,19 @@ def backup_epub(epub_path, book_slug):
 def main():
     client = Groq(api_key=GROQ_API_KEY)
 
+    # input klasöründe epub var mı kontrol et
     input_files = [f for f in os.listdir("input") if f.endswith(".epub")]
+
+    # Epub yoksa status'a bak — yarım kalmış iş var mı?
     if not input_files:
-        print("input/ klasöründe epub bulunamadı.")
+        if os.path.exists(STATUS_FILE):
+            with open(STATUS_FILE) as f:
+                prev = json.load(f)
+            if prev.get("status") == "running":
+                # Yarım kalmış iş var ama epub silinmiş — bu olmamalı, dur
+                print("Status running ama input'ta epub yok. Durduruluyor.")
+                return
+        print("input/ klasöründe epub bulunamadı, yapılacak iş yok.")
         return
 
     epub_file = input_files[0]
@@ -158,7 +167,6 @@ def main():
     if completed_start > 0:
         print(f"Kaldığı yerden devam: {completed_start}/{total}")
 
-    # Backup the original epub before anything else so convert.py can use images later
     backup_epub(epub_path, book_slug)
 
     status = {
