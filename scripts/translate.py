@@ -10,8 +10,31 @@ from datetime import datetime, timezone
 import time
 import re
 
-GROQ_API_KEY = os.environ["GROQ_API_KEY"]
 STATUS_FILE = "status.json"
+
+
+def get_groq_clients():
+    """Mevcut GROQ_API_KEY_* ve GROQ_API_KEY değişkenlerinden client listesi oluştur."""
+    clients = []
+
+    # GROQ_API_KEY_1, _2, _3, _4 varsa ekle
+    for i in range(1, 5):
+        key = os.environ.get(f"GROQ_API_KEY_{i}")
+        if key:
+            clients.append({"client": Groq(api_key=key), "locked_until": 0, "id": i})
+            print(f"Key {i} yüklendi.")
+
+    # Tekli GROQ_API_KEY varsa ve listede yoksa ekle
+    single_key = os.environ.get("GROQ_API_KEY")
+    if single_key and not clients:
+        clients.append({"client": Groq(api_key=single_key), "locked_until": 0, "id": "Default"})
+        print("Tekli GROQ_API_KEY yüklendi.")
+
+    if not clients:
+        raise ValueError("Hiçbir GROQ_API_KEY bulunamadı. Lütfen çevre değişkenlerini kontrol edin.")
+
+    print(f"Toplam {len(clients)} key aktif.")
+    return clients
 
 
 def git_push(message):
@@ -93,10 +116,11 @@ def parse_retry_seconds(error_message):
     for s in re.findall(r'([\d.]+)s', time_str):
         total += float(s)
 
-    return int(total) + 10
+    return int(total) + 5
 
 
-def translate_chunk(client, text, chapter_title, chunk_index, total_chunks):
+def translate_chunk(clients, key_index, text, chapter_title, chunk_index, total_chunks):
+    """Kilitlenme durumlarını (Rate Limit) akıllıca takip ederek çeviri yapar."""
     context = f" (Parça {chunk_index + 1}/{total_chunks})" if total_chunks > 1 else ""
     prompt = (
         f"Aşağıdaki İngilizce metni Türkçeye çevir. "
@@ -108,19 +132,52 @@ def translate_chunk(client, text, chapter_title, chunk_index, total_chunks):
     )
 
     while True:
+        current_time = time.time()
+        
+        # Müsait (kilitli olmayan) bir key bulana kadar dön
+        available_keys = [c for c in clients if c["locked_until"] <= current_time]
+        
+        if not available_keys:
+            # Eğer tüm keyler kilitliyse, kilidi en erken açılacak olanı bul ve bekle
+            min_lock_release = min(c["locked_until"] for c in clients)
+            wait_time = max(int(min_lock_release - current_time), 1)
+            print(f"Tüm keyler limit dışı. En yakın key için {wait_time} saniye bekleniyor...")
+            time.sleep(wait_time)
+            continue
+
+        # Sıradaki key_index'i mevcut kullanılabilir keylere eşitlemeye çalış
+        # Eğer index dışı kaldıysa veya kilitliyse, müsait ilk keye odaklanıyoruz
+        idx = key_index[0] % len(clients)
+        if clients[idx]["locked_until"] > current_time:
+            # Mevcut seçili olan kilitliyse, kilitli olmayan ilk keyin indexini al
+            for i, c in enumerate(clients):
+                if c["locked_until"] <= current_time:
+                    idx = i
+                    key_index[0] = i
+                    break
+
+        current_client_info = clients[idx]
+        client = current_client_info["client"]
+        key_id = current_client_info["id"]
+
         try:
             response = client.chat.completions.create(
                 model="llama-3.3-70b-versatile",
                 messages=[{"role": "user", "content": prompt}],
                 temperature=0.3,
             )
+            # Başarılı çeviriden sonra bir sonraki key indexine geçiş hazırlığı
+            key_index[0] = (idx + 1) % len(clients)
             return response.choices[0].message.content
+
         except RateLimitError as e:
             wait = parse_retry_seconds(e)
-            print(f"Rate limit — {wait} saniye bekleniyor ({wait//60} dakika)...")
-            time.sleep(wait)
+            print(f"Key {key_id} rate limit yedi! {wait} saniye kilitlendi. Sonraki key'e geçiliyor...")
+            clients[idx]["locked_until"] = time.time() + wait
+            key_index[0] = (idx + 1) % len(clients)
+            
         except Exception as e:
-            print(f"Hata: {e} — 30 saniye sonra tekrar deneniyor...")
+            print(f"Sistemsel Hata: {e} — 30 saniye sonra tekrar deneniyor...")
             time.sleep(30)
 
 
@@ -134,18 +191,16 @@ def backup_epub(epub_path, book_slug):
 
 
 def main():
-    client = Groq(api_key=GROQ_API_KEY)
+    clients = get_groq_clients()
+    key_index = [0]  # Paylaşılan mutable referans
 
-    # input klasöründe epub var mı kontrol et
     input_files = [f for f in os.listdir("input") if f.endswith(".epub")]
 
-    # Epub yoksa status'a bak — yarım kalmış iş var mı?
     if not input_files:
         if os.path.exists(STATUS_FILE):
             with open(STATUS_FILE) as f:
                 prev = json.load(f)
             if prev.get("status") == "running":
-                # Yarım kalmış iş var ama epub silinmiş — bu olmamalı, dur
                 print("Status running ama input'ta epub yok. Durduruluyor.")
                 return
         print("input/ klasöründe epub bulunamadı, yapılacak iş yok.")
@@ -186,7 +241,7 @@ def main():
             print(f"[{i+1}/{total}] Atlanıyor (zaten mevcut): {chapter['title']}")
             continue
 
-        print(f"[{i+1}/{total}] {chapter['title']}")
+        print(f"[{i+1}/{total}] Çevriliyor: {chapter['title']}")
         status["current_chapter"] = chapter["title"]
         write_status(status)
 
@@ -194,9 +249,9 @@ def main():
         translated_parts = []
 
         for j, chunk in enumerate(chunks):
-            translated = translate_chunk(client, chunk, chapter["title"], j, len(chunks))
+            translated = translate_chunk(clients, key_index, chunk, chapter["title"], j, len(chunks))
             translated_parts.append(translated)
-            time.sleep(2)
+            time.sleep(2)  # Kısa cooldown CoG limitlerine takılmamak için yararlı
 
         full_translation = "\n\n".join(translated_parts)
 
@@ -207,14 +262,15 @@ def main():
         subprocess.run(["git", "add", out_path])
         write_status(status)
 
-    os.remove(epub_path)
-    subprocess.run(["git", "rm", epub_path], check=True)
+    if os.path.exists(epub_path):
+        os.remove(epub_path)
+        subprocess.run(["git", "rm", epub_path], check=True)
 
     status["status"] = "completed"
     status["current_chapter"] = ""
     write_status(status)
 
-    print("Çeviri tamamlandı.")
+    print("Çeviri başarıyla tamamlandı.")
 
 
 if __name__ == "__main__":
