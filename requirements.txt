@@ -3,3 +3,5 @@ beautifulsoup4
 groq
 lxml
 html5lib
+pdfplumber
+pypdf
