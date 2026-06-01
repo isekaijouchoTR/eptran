@@ -338,10 +338,10 @@
   <div class="card-title">kitap yükle</div>
 
   <div id="drop-zone">
-    <input type="file" id="file-input" accept=".epub" />
+    <input type="file" id="file-input" accept=".epub,.pdf" />
     <span class="icon">📖</span>
     <div class="label">
-      <strong>epub seç</strong> ya da sürükle bırak
+      <strong>epub veya pdf seç</strong> ya da sürükle bırak
     </div>
   </div>
 
@@ -411,9 +411,8 @@
     if (fileInput.files[0]) setFile(fileInput.files[0]);
   });
 
-  function setFile(file) {
-    if (!file.name.endsWith('.epub')) {
-      showError('Sadece .epub dosyaları destekleniyor.');
+    if (!file.name.endsWith('.epub') && !file.name.endsWith('.pdf')) {
+       showError('Sadece .epub ve .pdf dosyaları destekleniyor.');
       return;
     }
     selectedFile = file;
