@@ -1,12 +1,10 @@
 {
-  "status": "completed",
-  "book": "ksnh14",
-  "epub_file": "ksnh14.epub",
-  "total": 34,
-  "completed": 34,
+  "status": "running",
+  "book": "document",
+  "epub_file": "document.epub",
+  "total": 24,
+  "completed": 0,
   "current_chapter": "",
-  "started_at": "2026-05-31T04:48:35.334273+00:00",
-  "updated_at": "2026-05-31T15:06:15.167950+00:00",
-  "epub_output": "output/ksnh14/ksnh14_tr.epub",
-  "convert_status": "completed"
+  "started_at": "2026-06-01T15:16:07.554525+00:00",
+  "updated_at": "2026-06-01T15:16:07.554550+00:00"
 }
