@@ -1,10 +1,10 @@
 {
-  "status": "running",
+  "status": "completed",
   "book": "document",
   "epub_file": "document.epub",
   "total": 24,
   "completed": 24,
-  "current_chapter": "References",
+  "current_chapter": "",
   "started_at": "2026-06-01T15:16:07.554525+00:00",
-  "updated_at": "2026-06-01T15:26:05.156866+00:00"
+  "updated_at": "2026-06-01T15:26:06.209693+00:00"
 }
