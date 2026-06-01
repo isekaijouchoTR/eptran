@@ -5,6 +5,7 @@ on:
   push:
     paths:
       - "input/*.epub"
+      - "input/*.pdf"
   schedule:
     - cron: "0 */6 * * *"
 
