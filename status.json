@@ -1,12 +1,11 @@
 {
-  "status": "completed",
-  "book": "document",
-  "epub_file": "document.epub",
-  "total": 24,
-  "completed": 24,
+  "status": "running",
+  "book": "ngnlv4",
+  "epub_file": "ngnlv4.pdf",
+  "source_type": "pdf",
+  "total": 9,
+  "completed": 0,
   "current_chapter": "",
-  "started_at": "2026-06-01T15:16:07.554525+00:00",
-  "updated_at": "2026-06-01T15:26:33.297439+00:00",
-  "convert_status": "completed",
-  "epub_output": "output/document/document_tr.epub"
+  "started_at": "2026-06-01T19:01:23.069313+00:00",
+  "updated_at": "2026-06-01T19:01:23.069337+00:00"
 }
