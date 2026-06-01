@@ -7,3 +7,4 @@ __pycache__/
 
 # Input klasörü içindeki gerçek dosyalar (sadece .gitkeep kalır)
 input/*.epub
+input/*.pdf
