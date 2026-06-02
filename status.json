@@ -7,6 +7,7 @@
   "completed": 9,
   "current_chapter": "",
   "started_at": "2026-06-02T12:59:41.470960+00:00",
-  "updated_at": "2026-06-02T13:02:26.357864+00:00",
-  "convert_status": "running"
+  "updated_at": "2026-06-02T13:02:28.021955+00:00",
+  "convert_status": "completed",
+  "epub_output": "output/ngnlv4/ngnlv4_tr.epub"
 }
