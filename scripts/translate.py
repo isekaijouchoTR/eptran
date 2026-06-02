@@ -67,31 +67,52 @@ def extract_chapters_epub(epub_path):
     return chapters
 
 
-def extract_chapters_pdf(pdf_path):
+def extract_chapters_pdf(pdf_path, book_slug):
     """
-    PDF'ten bölümleri çıkar.
-    Bölüm tespiti: "Chapter X", "CHAPTER X", "Chapter X:" veya
-    tamamen büyük harfli kısa satır (başlık benzeri) pattern'leri.
+    PDF'ten bölümleri çıkarır ve gömülü görselleri PyMuPDF ile ayıklar.
+    Görsellerin çıktığı yere metin içinde yer tutucu bir etiket yerleştirir.
     """
     import pdfplumber
+    import fitz
 
     chapter_patterns = [
         re.compile(r'^(chapter\s+\w+[\s:\-–—]?.*)$', re.IGNORECASE),
         re.compile(r'^(prologue|epilogue|interlude|afterword|foreword|preface)$', re.IGNORECASE),
-        re.compile(r'^(\d+\.\s+.{3,60})$'),           # "1. Başlık"
-        re.compile(r'^([IVX]+\.\s+.{3,60})$'),         # "IV. Başlık"
+        re.compile(r'^(\d+\.\s+.{3,60})$'),           
+        re.compile(r'^([IVX]+\.\s+.{3,60})$'),         
     ]
 
     all_lines = []
+    images_dir = f"output/{book_slug}/images"
+    os.makedirs(images_dir, exist_ok=True)
+    
+    doc_fitz = fitz.open(pdf_path)
+
     with pdfplumber.open(pdf_path) as pdf:
         print(f"PDF sayfa sayısı: {len(pdf.pages)}")
-        for page in pdf.pages:
+        for page_idx, page in enumerate(pdf.pages):
             text = page.extract_text()
             if text:
                 all_lines.extend(text.split("\n"))
+            
+            fitz_page = doc_fitz[page_idx]
+            image_list = fitz_page.get_images(full=True)
+            for img_idx, img in enumerate(image_list):
+                xref = img[0]
+                base_image = doc_fitz.extract_image(xref)
+                image_bytes = base_image["image"]
+                image_ext = base_image["ext"]
+                
+                img_name = f"page_{page_idx+1}_img_{img_idx+1}.{image_ext}"
+                img_path = os.path.join(images_dir, img_name)
+                
+                with open(img_path, "wb") as f_img:
+                    f_img.write(image_bytes)
+                
+                all_lines.append(f"[EPUB_IMAGE:{img_name}]")
+                
             all_lines.append("")  # sayfa sonu boşluk
 
-    # Bölüm başlangıç noktalarını bul
     chapter_starts = []
     for i, line in enumerate(all_lines):
         stripped = line.strip()
@@ -105,7 +126,6 @@ def extract_chapters_pdf(pdf_path):
     chapters = []
 
     if not chapter_starts:
-        # Bölüm başlığı bulunamadıysa tüm metni tek bölüm olarak al
         print("Bölüm başlığı tespit edilemedi — tüm metin tek bölüm olarak işlenecek.")
         full_text = "\n".join(all_lines).strip()
         full_text = re.sub(r"\n{3,}", "\n\n", full_text)
@@ -117,7 +137,6 @@ def extract_chapters_pdf(pdf_path):
             })
         return chapters
 
-    # Son bölüm için bitiş noktası
     chapter_starts.append((len(all_lines), None))
 
     for idx in range(len(chapter_starts) - 1):
@@ -138,11 +157,11 @@ def extract_chapters_pdf(pdf_path):
     return chapters
 
 
-def extract_chapters(file_path):
+def extract_chapters(file_path, book_slug):
     """epub veya pdf'e göre doğru extractor'ı seç."""
     ext = os.path.splitext(file_path)[1].lower()
     if ext == ".pdf":
-        return extract_chapters_pdf(file_path)
+        return extract_chapters_pdf(file_path, book_slug)
     else:
         return extract_chapters_epub(file_path)
 
@@ -185,6 +204,7 @@ def translate_chunk(clients, key_index, text, chapter_title, chunk_index, total_
         f"Aşağıdaki İngilizce metni Türkçeye çevir. "
         f"Çeviriyi doğal, akıcı ve edebi tut. "
         f"Karakterlerin sesini, tonunu ve yazı stilini koru. "
+        f"Metinde göreceğin '[EPUB_IMAGE:...]' şeklindeki görsel etiketlerini KESİNLİKLE değiştirme, çevirme ve aynen oldukları yerde koru. "
         f"Sadece çeviriyi döndür, başka hiçbir şey ekleme.\n\n"
         f"Bölüm: {chapter_title}{context}\n\n"
         f"{text}"
@@ -240,7 +260,6 @@ def main():
     clients = get_groq_clients()
     key_index = [0]
 
-    # epub ve pdf dosyalarını tara
     input_files = [
         f for f in os.listdir("input")
         if f.endswith(".epub") or f.endswith(".pdf")
@@ -263,7 +282,7 @@ def main():
 
     print(f"Dosya: {input_file} (tür: {file_ext})")
 
-    chapters = extract_chapters(file_path)
+    chapters = extract_chapters(file_path, book_slug)
     total = len(chapters)
     print(f"Toplam bölüm: {total}")
 
@@ -283,7 +302,7 @@ def main():
         "status": "running",
         "book": book_slug,
         "epub_file": input_file,
-        "source_type": file_ext.lstrip("."),  # "epub" veya "pdf"
+        "source_type": file_ext.lstrip("."),
         "total": total,
         "completed": completed_start,
         "current_chapter": "",
