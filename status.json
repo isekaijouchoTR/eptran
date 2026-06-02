@@ -1,11 +1,11 @@
 {
-  "status": "running",
+  "status": "completed",
   "book": "ngnlv4",
   "epub_file": "ngnlv4.pdf",
   "source_type": "pdf",
   "total": 9,
   "completed": 9,
-  "current_chapter": "25. ↑ TL note: Go-home club i.e. no clubs. Go home.",
+  "current_chapter": "",
   "started_at": "2026-06-02T12:59:41.470960+00:00",
-  "updated_at": "2026-06-02T13:01:53.668115+00:00"
+  "updated_at": "2026-06-02T13:01:55.414804+00:00"
 }
