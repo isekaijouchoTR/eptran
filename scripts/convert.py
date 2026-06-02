@@ -83,6 +83,9 @@ def text_to_xhtml(title, body):
         elif para.startswith("# "):
             paragraphs.append(f"<h2>{para[2:].strip()}</h2>")
         else:
+            if "[EPUB_IMAGE:" in para:
+                para = re.sub(r'\[EPUB_IMAGE:(.*?)\]', r'<img src="../Images/\1" alt="image" />', para)
+
             lines = para.split("\n")
             joined = "<br/>".join(line.strip() for line in lines if line.strip())
             paragraphs.append(f"<p>{joined}</p>")
@@ -113,7 +116,6 @@ def find_original_epub(book_slug):
 
 def get_spine_order(original_book):
     """Spine sırasına göre item listesi döndür."""
-    # ebooklib'in spine özelliğini kullan
     spine_ids = [idref for idref, _ in original_book.spine]
     items_by_id = {item.id: item for item in original_book.get_items()}
     ordered = []
@@ -145,28 +147,25 @@ def build_epub(book_slug, chapters, original_epub_path, output_path):
     if original_epub_path and os.path.exists(original_epub_path):
         original_book = epub.read_epub(original_epub_path)
 
-        # Kitap adını metadata'dan al
         title_meta = original_book.get_metadata('DC', 'title')
         book_title = title_meta[0][0] if title_meta else book_slug.replace("_", " ")
         book.set_title(book_title)
 
-        # Tüm görselleri ekle
         for item in original_book.get_items():
             if item.get_type() in (ebooklib.ITEM_IMAGE, ebooklib.ITEM_COVER):
+                safe_uid = f"img_{re.sub(r'[^a-zA-Z0-9_]', '_', item.get_name())}"
                 img_item = epub.EpubItem(
-                    uid=f"img_{item.get_name().replace('/', '_').replace('.', '_')}",
+                    uid=safe_uid,
                     file_name=item.get_name(),
                     media_type=item.media_type,
                     content=item.get_content(),
                 )
                 book.add_item(img_item)
 
-        # Kapağı ayarla
         cover_item = extract_cover_image(original_book)
         if cover_item:
             book.set_cover(cover_item.get_name(), cover_item.get_content())
 
-        # SPINE sırasıyla geç — insert'ler doğru yerde olsun
         spine_items = get_spine_order(original_book)
         chapter_index = 0
 
@@ -175,17 +174,16 @@ def build_epub(book_slug, chapters, original_epub_path, output_path):
                 continue
 
             soup = BeautifulSoup(item.get_content(), "html.parser")
-            for tag in soup(["script", "style", "nav"]):
+            for tag in soup(["script", "style"]):
                 tag.decompose()
             text = soup.get_text().strip()
             imgs = soup.find_all("img")
             item_name = item.get_name()
             safe_name = item_name.replace('/', '_').replace('.', '_')
 
-            # insert*.xhtml veya görsel ağırlıklı sayfa → orijinali koru
             base = os.path.basename(item_name).lower()
             is_insert = base.startswith("insert") or base.startswith("frontmatter") or base.startswith("bonus")
-            is_image_page = imgs and len(text) < 300
+            is_image_page = bool(imgs) and len(text) < 300
 
             if is_insert or is_image_page:
                 ill_item = epub.EpubHtml(
@@ -198,7 +196,6 @@ def build_epub(book_slug, chapters, original_epub_path, output_path):
                 epub_items.append(ill_item)
 
             elif len(text) >= 300 and chapter_index < len(chapters):
-                # Metin sayfası → çevrilmiş bölümle değiştir
                 ch = chapters[chapter_index]
                 chapter_index += 1
                 ch_id = f"chapter_{chapter_index:03d}"
@@ -213,7 +210,6 @@ def build_epub(book_slug, chapters, original_epub_path, output_path):
                 epub_items.append(epub_ch)
 
             else:
-                # Kısa sayfa (telif, toc, signup vb.) → orijinali koru
                 short_item = epub.EpubHtml(
                     title="",
                     file_name=f"Text/short_{safe_name}.xhtml",
@@ -227,8 +223,45 @@ def build_epub(book_slug, chapters, original_epub_path, output_path):
             print(f"Uyarı: {len(chapters) - chapter_index} bölüm eşleştirilemedi.")
 
     else:
-        print("Orijinal epub bulunamadı — görselsiz epub oluşturulacak.")
+        print("Orijinal epub bulunamadı — PDF veya bağımsız metin modunda derleniyor.")
         book.set_title(book_slug.replace("_", " "))
+        
+        images_dir = f"output/{book_slug}/images"
+        if os.path.exists(images_dir):
+            for img_name in sorted(os.listdir(images_dir)):
+                img_path = os.path.join(images_dir, img_name)
+                if os.path.isdir(img_path):
+                    continue
+                ext = os.path.splitext(img_name)[1].lower()
+                
+                if ext in ('.jpg', '.jpeg'):
+                    m_type = "image/jpeg"
+                elif ext == '.png':
+                    m_type = "image/png"
+                elif ext == '.gif':
+                    m_type = "image/gif"
+                elif ext == '.webp':
+                    m_type = "image/webp"
+                else:
+                    continue
+                    
+                with open(img_path, "rb") as f_img:
+                    img_content = f_img.read()
+                    
+                epub_img_item = epub.EpubItem(
+                    uid=f"img_{re.sub(r'[^a-zA-Z0-9_]', '_', img_name)}",
+                    file_name=f"Images/{img_name}",
+                    media_type=m_type,
+                    content=img_content
+                )
+                book.add_item(epub_img_item)
+            
+            cover_candidates = [f for f in os.listdir(images_dir) if f.startswith("page_1_img_1") or f.startswith("page_2_img_1")]
+            if cover_candidates:
+                cover_name = sorted(cover_candidates)[0]
+                with open(os.path.join(images_dir, cover_name), "rb") as f_img:
+                    book.set_cover(f"Images/{cover_name}", f_img.read())
+
         for i, ch in enumerate(chapters):
             ch_id = f"chapter_{i+1:03d}"
             xhtml = text_to_xhtml(ch["title"], ch["body"])
@@ -293,7 +326,7 @@ def main():
     if original_epub_path:
         print(f"Orijinal epub bulundu: {original_epub_path}")
     else:
-        print("Orijinal epub bulunamadı — görselsiz epub oluşturulacak.")
+        print("Orijinal epub bulunamadı — PDF veya bağımsız metin modunda derleniyor.")
 
     epub_out = f"output/{book_slug}/{book_slug}_tr.epub"
 
